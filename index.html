@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flutter Fast-Path Checklist</title>
+    <style>
+      :root {
+        --accent: #ffb300;
+        --bg: #fffaf0;
+        --text: #333;
+        --card: #fffbe6;
+        --shadow: rgba(0, 0, 0, 0.1);
+      }
+
+      body {
+        font-family: "Poppins", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+      }
+
+      header {
+        text-align: center;
+        background: var(--accent);
+        width: 100%;
+        padding: 1.2rem;
+        box-shadow: 0 2px 8px var(--shadow);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+
+      header h1 {
+        margin: 0;
+        font-size: 1.4rem;
+        color: #fff;
+        letter-spacing: 0.5px;
+      }
+
+      .progress-container {
+        width: 90%;
+        background: #fff;
+        border-radius: 12px;
+        margin: 1rem auto;
+        box-shadow: 0 2px 5px var(--shadow);
+        padding: 0.5rem;
+      }
+
+      .progress-bar {
+        height: 12px;
+        background: var(--accent);
+        border-radius: 10px;
+        width: 0%;
+        transition: width 0.4s ease;
+      }
+
+      .progress-info {
+        text-align: center;
+        font-size: 0.9rem;
+        margin-top: 0.4rem;
+        color: #555;
+      }
+
+      main {
+        width: 95%;
+        max-width: 600px;
+        margin: 1rem auto 3rem;
+        background: var(--card);
+        border-radius: 12px;
+        padding: 1rem 1.2rem;
+        box-shadow: 0 4px 10px var(--shadow);
+      }
+
+      h2 {
+        font-size: 1.1rem;
+        margin-top: 1.5rem;
+        color: #222;
+        border-left: 4px solid var(--accent);
+        padding-left: 8px;
+      }
+
+      label {
+        display: flex;
+        align-items: center;
+        margin: 0.4rem 0;
+        background: #fff;
+        padding: 0.6rem 0.8rem;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px var(--shadow);
+        transition: all 0.2s ease;
+      }
+
+      label:hover {
+        transform: translateY(-2px);
+      }
+
+      input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        margin-right: 0.7rem;
+        accent-color: var(--accent);
+      }
+
+      .checked {
+        text-decoration: line-through;
+        color: #777;
+      }
+
+      footer {
+        position: fixed;
+        bottom: 0;
+        background: var(--accent);
+        color: #fff;
+        width: 100%;
+        text-align: center;
+        padding: 0.8rem;
+        font-size: 0.9rem;
+        box-shadow: 0 -2px 8px var(--shadow);
+      }
+
+      button {
+        background: var(--accent);
+        color: white;
+        border: none;
+        padding: 0.6rem 1.2rem;
+        font-size: 0.9rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+        cursor: pointer;
+        box-shadow: 0 2px 5px var(--shadow);
+        transition: 0.2s;
+      }
+
+      button:hover {
+        opacity: 0.9;
+        transform: scale(1.03);
+      }
+
+      @media (max-width: 600px) {
+        main {
+          padding: 1rem;
+        }
+        label {
+          font-size: 0.95rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>📝 Flutter Fast-Path Checklist</h1>
+    </header>
+
+    <div class="progress-container">
+      <div class="progress-bar" id="progressBar"></div>
+      <div class="progress-info" id="progressInfo">0% completed</div>
+    </div>
+
+    <main id="checklist"></main>
+
+    <div style="text-align: center; margin-bottom: 5rem">
+      <button id="resetBtn">Reset Progress</button>
+    </div>
+
+    <footer>Progress saved automatically 💾</footer>
+
+    <script>
+      const topics = {
+        "1️⃣ Dart & Basics": [
+          "Variables (var, final, const)",
+          "Functions & parameters",
+          "Lists and Maps",
+          "Classes & constructors",
+          "Async/await and Futures",
+          "Null safety (? and !)",
+        ],
+        "2️⃣ Flutter Structure": [
+          "main.dart and main()",
+          "MaterialApp and home widget",
+          "StatelessWidget vs StatefulWidget",
+          "Build method and widget tree",
+        ],
+        "3️⃣ Layout & UI": [
+          "Scaffold, Container, Row, Column",
+          "Padding, SizedBox, Center",
+          "Text, Image, Icon",
+          "ListView, GridView",
+          "Buttons (Elevated, Text, Icon)",
+        ],
+        "4️⃣ State Management": [
+          "setState() and StatefulWidget logic",
+          "Passing data between screens",
+          "TextField + TextEditingController",
+          "Toggle or dynamic state changes",
+        ],
+        "5️⃣ Navigation": [
+          "Navigator.push / pop",
+          "Named routes",
+          "BottomNavigationBar or Drawer",
+        ],
+        "6️⃣ Data & Persistence": [
+          "SharedPreferences or Hive",
+          "HTTP requests & JSON",
+          "Basic Firebase (Auth, Firestore)",
+        ],
+        "7️⃣ Forms & Validation": [
+          "Form and TextFormField",
+          "Validator functions",
+          "ScaffoldMessenger (snackbars)",
+        ],
+        "8️⃣ Styling & Theming": [
+          "ThemeData (colors, fonts)",
+          "Light/dark themes",
+          "Custom fonts/icons",
+          "Reusable styles",
+        ],
+        "9️⃣ Async & Lifecycle": [
+          "FutureBuilder / StreamBuilder",
+          "initState / dispose",
+          "Loading indicators",
+        ],
+        "🔟 Deployment": [
+          "Run on emulator/phone",
+          "Build APK",
+          "Publish basics (Play Store/App Store)",
+        ],
+      };
+
+      const checklistContainer = document.getElementById("checklist");
+      const progressBar = document.getElementById("progressBar");
+      const progressInfo = document.getElementById("progressInfo");
+      const resetBtn = document.getElementById("resetBtn");
+
+      let savedProgress = JSON.parse(
+        localStorage.getItem("flutterChecklist") || "{}"
+      );
+
+      function saveProgress() {
+        localStorage.setItem("flutterChecklist", JSON.stringify(savedProgress));
+        updateProgress();
+      }
+
+      function resetProgress() {
+        if (confirm("Reset all your progress?")) {
+          savedProgress = {};
+          saveProgress();
+          renderChecklist();
+        }
+      }
+
+      function updateProgress() {
+        const total = Object.values(topics).flat().length;
+        const completed = Object.values(savedProgress).filter(Boolean).length;
+        const percent = Math.round((completed / total) * 100);
+        progressBar.style.width = percent + "%";
+        progressInfo.textContent = `${percent}% completed (${completed}/${total})`;
+      }
+
+      function renderChecklist() {
+        checklistContainer.innerHTML = "";
+        for (const [section, items] of Object.entries(topics)) {
+          const sectionTitle = document.createElement("h2");
+          sectionTitle.textContent = section;
+          checklistContainer.appendChild(sectionTitle);
+
+          items.forEach((item) => {
+            const label = document.createElement("label");
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.checked = savedProgress[item] || false;
+
+            const span = document.createElement("span");
+            span.textContent = item;
+            if (checkbox.checked) span.classList.add("checked");
+
+            checkbox.addEventListener("change", () => {
+              savedProgress[item] = checkbox.checked;
+              span.classList.toggle("checked", checkbox.checked);
+              saveProgress();
+            });
+
+            label.appendChild(checkbox);
+            label.appendChild(span);
+            checklistContainer.appendChild(label);
+          });
+        }
+        updateProgress();
+      }
+
+      resetBtn.addEventListener("click", resetProgress);
+
+      renderChecklist();
+    </script>
+  </body>
+</html>
